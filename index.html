@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Week 5 Assignment</title>
+
+	<style type="text/css">
+	.highlight { color: blue;}
+	</style>
+</head>
+<body>
+<!-- 
+	<section class="search">
+	
+
+	</section> -->
+	
+	<section class="search-options">
+		<div>
+			<form class="search__field--username">
+				Twitter Handle: <input type="text" class="user-input--username" placeholder="Enter Username">
+				<button class ="user-input--username__submit" type="submit">Search For User</button>
+			</form>
+		</div>
+		<hr/>
+
+		<div>
+			<form class="search__field--keyword">
+				Query: <input class= "user-input--quick-search" name="q" type="text" />
+				<button class ="user-input--quick-search__submit" type="submit">Quick Search</button>
+			</form>
+		</div>
+		<hr/>
+
+		<div>
+			<form class="search__field--custom-search">
+				Query: <input class= "user-input--custom-search" name="q" type="text" />
+				Limit: <input class="user-input--custom-search__count" name="count" type="number" />
+				Result Type:
+				<select class="user-input--custom-search-type-select" name="result_type">
+					<option value="mixed">Default</option>
+					<option value="popular">Most popular</option>
+					<option value="recent">Most recent</option>
+				</select>
+				<button class ="user-input--custom-search__submit" type="submit">Custom Search</button>
+			</form>
+		</div>
+		<hr/>
+	</section>
+
+	<section class="search-results"></div>
+	<hr/>
+
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="js/week5.js"></script>
+</body>
+</html>
