@@ -104,12 +104,25 @@ var TwitterApi = (function(options) {
 
 				function highlightTerms(e) {
 
-					var replaceWithThis = '<span class="highlight">' + searchTerm + '</span>';
-
 					var searchForThis = new RegExp(searchTerm, 'gi');
+
+					var replaceWithThis = '<span class="highlight">' + searchTerm + '</span>';
 
 					return e.replace(searchForThis, replaceWithThis);
 				}
+
+				function makeURLS(e) {
+					var searchForThis = new RegExp(/(http|www)[^ ]*/, 'gi');
+					console.log(e.replace(searchForThis, 'THIS IS A URL'));
+				}
+
+				function linkToUser(e) {
+					var searchForThis = new RegExp(/(?=@).*?\b/);
+					var username = e.match(searchForThis);
+					console.log(e.match(searchForThis('a @username bunch of shit @username is not a @username URL')));
+				}
+
+				linkToUser();
 
 				var usernameToPost = $("<h5>");
 					usernameToPost.html(highlightTerms(username));
@@ -142,7 +155,9 @@ var TwitterApi = (function(options) {
 
 TwitterApi.init();
 
-	// GAME PLAN: 
+function makeURLS(e) {
+					// var searchForThis = new RegExp(/\/*(http|www)\w+[.]\b/, 'gi');
+					// var searchForThis = new RegExp(/((\b(http|www|https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]))+?/, 'gi');
 
-	
-	
+					console.log(e.replace(searchForThis, 'REPLACED'));
+				}
