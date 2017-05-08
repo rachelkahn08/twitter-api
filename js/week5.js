@@ -28,34 +28,45 @@
 var TwitterApi = (function(options) {
 	var shared = {};
 	var options = options || {};
+	var searchTerm;
 
 	// 	get input from user
 	
 
 	function setEventListeners() {
+		//$.ajax({url: url, dataType: ‘json’})
+
 		$('.search__field--username').on('submit', function(e){
 			e.preventDefault();
+			searchTerm = $('.user-input--username').val();
 			// 	convert input to twitter-speak & GET
-			$.ajax('twitter-proxy.php?op=user_timeline&screen_name=' + $('.user-input--username').val())
+			$.ajax({
+				url: 'twitter-proxy.php?op=user_timeline&screen_name=' + searchTerm,
+				dataType: 'json'})
 			.done(populateResults);
+			return searchTerm;
 		});
 
 		$('.search__field--keyword').on('submit', function(e){
 			e.preventDefault();
-			console.log('quick search');
-
+			searchTerm = $('.user-input--quick-search').val();
 			// 	convert input to twitter-speak & GET
-			$.ajax('twitter-proxy.php?op=search_tweets&q=' + $('.user-input--quick-search').val())
+			$.ajax({
+				url: 'twitter-proxy.php?op=search_tweets&q=' + searchTerm,
+				dataType: 'json'})
 			.done(ditchMetadata);
+			return searchTerm;
 		});
 
 		$('.search__field--custom-search').on('submit', function(e){
 			e.preventDefault();
-			console.log('quick search');
-
+			searchTerm = $('.user-input--custom-search').val();
 			// 	convert input to twitter-speak & GET
-			$.ajax('twitter-proxy.php?op=search_tweets&q=' + $('.user-input--custom-search').val() + "&count=" + $('.user-input--custom-search__count').val() + "&result_type=" + $('.user-input--custom-search-type-select').val())
+			$.ajax({
+				url: 'twitter-proxy.php?op=search_tweets&q=' + searchTerm + "&count=" + $('.user-input--custom-search__count').val() + "&result_type=" + $('.user-input--custom-search-type-select').val(),
+				dataType: 'json'})
 			.done(ditchMetadata);
+			return searchTerm;
 		});
 
 
@@ -64,34 +75,53 @@ var TwitterApi = (function(options) {
 	}
 
 	function ditchMetadata(results) {
-		results = JSON.parse(results);
 		results = results.statuses;
-		results = JSON.stringify(results);
 		populateResults(results);
 	}
 
+	// function regExifyInput(input) {
+	// 	var input = searchTerm;
+		
+	// 	console.dir(input);
+	// 	return input;
+	// }
+
 	function populateResults(results) {
+		console.log(searchTerm);
 		if ( $('.search-results').has("div") ) {
 			$('.search-results').empty();
 		}
 		
 		// 	convert twitter-speak to object
-		results = JSON.parse(results);
-
 		if (results.length) {
-			// 	populate page with info
+			
+			console.log(searchTerm);
+
 			for (i = 0; i < results.length; i++) {
+
 				username = results[i].user.screen_name;
 				tweetText = results[i].text;
 
+				function highlightTerms(e) {
+
+					var replaceWithThis = '<span class="highlight">' + searchTerm + '</span>';
+
+					var searchForThis = new RegExp(searchTerm, 'gi');
+
+					return e.replace(searchForThis, replaceWithThis);
+				}
+
 				var usernameToPost = $("<h5>");
-					usernameToPost.html(username);
+					usernameToPost.html(highlightTerms(username));
 				var tweetTextContainer = $("<p>");
-					tweetTextContainer.append(tweetText);
+					tweetTextContainer.append(highlightTerms(tweetText));
 				var tweetToPost = $("<div>");
 
 				tweetToPost.append(usernameToPost, tweetTextContainer);
 
+				
+
+				// regExProcess(tweetToPost);
 
 				$('.search-results').append(tweetToPost);
 				

@@ -4,7 +4,8 @@
 	<title>Week 5 Assignment</title>
 
 	<style type="text/css">
-	.highlight { color: blue;}
+	.highlight { color: blue;
+		background-color: yellow;}
 	</style>
 </head>
 <body>
@@ -25,7 +26,7 @@
 
 		<div>
 			<form class="search__field--keyword">
-				Query: <input class= "user-input--quick-search" name="q" type="text" />
+				Query: <input class= "user-input--quick-search" name="q" type="text" placeholder="Enter Keywords"/>
 				<button class ="user-input--quick-search__submit" type="submit">Quick Search</button>
 			</form>
 		</div>
@@ -33,8 +34,8 @@
 
 		<div>
 			<form class="search__field--custom-search">
-				Query: <input class= "user-input--custom-search" name="q" type="text" />
-				Limit: <input class="user-input--custom-search__count" name="count" type="number" />
+				Query: <input class= "user-input--custom-search" name="q" type="text" placeholder="Enter Keywords"/>
+				Limit: <input class="user-input--custom-search__count" name="count" type="number" placeholder="..."/>
 				Result Type:
 				<select class="user-input--custom-search-type-select" name="result_type">
 					<option value="mixed">Default</option>
