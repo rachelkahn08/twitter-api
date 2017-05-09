@@ -1,30 +1,3 @@
-
-// var TwitterApi = (function(options) {
-// 	var shared = {};
-// 	var options = options || {};
-
-// 	function setupListeners() {
-// 		console.log('setupListeners()');
-// 	}
-
-// 	function processTweetResults(results) {
-// 		console.log('got results', results);
-// 	}
-
-// 	var init = function() {
-// 		console.log('init()');
-
-// 		$.ajax('twitter-proxy.php?op=search_tweets&q=france')
-// 		.done(processTweetResults);
-// 	};
-// 	shared.init = init;
-
-// 	return shared;
-// }());
-
-// TwitterApi.init();
-
-
 var TwitterApi = (function(options) {
 	var shared = {};
 	var options = options || {};
@@ -67,24 +40,13 @@ var TwitterApi = (function(options) {
 				dataType: 'json'})
 			.done(ditchMetadata);
 			return searchTerm;
-		});
-
-
-
-		
+		});	
 	}
 
 	function ditchMetadata(results) {
 		results = results.statuses;
 		populateResults(results);
 	}
-
-	// function regExifyInput(input) {
-	// 	var input = searchTerm;
-		
-	// 	console.dir(input);
-	// 	return input;
-	// }
 
 	function populateResults(results) {
 		console.log(searchTerm);
@@ -103,26 +65,33 @@ var TwitterApi = (function(options) {
 				tweetText = results[i].text;
 
 				function highlightTerms(e) {
-
 					var searchForThis = new RegExp(searchTerm, 'gi');
-
 					var replaceWithThis = '<span class="highlight">' + searchTerm + '</span>';
-
 					return e.replace(searchForThis, replaceWithThis);
 				}
 
-				function makeURLS(e) {
-					var searchForThis = new RegExp(/(http|www)[^ ]*/, 'gi');
-					console.log(e.replace(searchForThis, 'THIS IS A URL'));
-				}
-
 				function linkToUser(e) {
-					var searchForThis = new RegExp(/(?=@).*?\b/);
-					var username = e.match(searchForThis);
-					console.log(e.match(searchForThis('a @username bunch of shit @username is not a @username URL')));
+					console.log(tweetText);
+					var searchForThis = new RegExp('((http|https|www).+\\w+)', 'gi');
+					tweetText = e.replace(searchForThis, '<a href="$1">$1<a>');
+					
+					function searchForTags(e) {
+						console.log(tweetText);
+						var searchForThis = RegExp('@((\\w+))?', "ig");
+						tweetText = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>'); //'<a href="https://twitter.com/$1></a>'
+						
+						function searchForHash(e) {
+							console.log(tweetText);
+							var searchForThis = RegExp('\\#((\\w+))?', "ig");
+							tweetText = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>');
+						}
+						return searchForHash(tweetText);
+					}
+
+					return searchForTags(tweetText);
 				}
 
-				linkToUser();
+				linkToUser(tweetText);
 
 				var usernameToPost = $("<h5>");
 					usernameToPost.html(highlightTerms(username));
@@ -131,10 +100,6 @@ var TwitterApi = (function(options) {
 				var tweetToPost = $("<div>");
 
 				tweetToPost.append(usernameToPost, tweetTextContainer);
-
-				
-
-				// regExProcess(tweetToPost);
 
 				$('.search-results').append(tweetToPost);
 				
@@ -155,9 +120,3 @@ var TwitterApi = (function(options) {
 
 TwitterApi.init();
 
-function makeURLS(e) {
-					// var searchForThis = new RegExp(/\/*(http|www)\w+[.]\b/, 'gi');
-					// var searchForThis = new RegExp(/((\b(http|www|https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]))+?/, 'gi');
-
-					console.log(e.replace(searchForThis, 'REPLACED'));
-				}
