@@ -3,15 +3,12 @@ var TwitterApi = (function(options) {
 	var options = options || {};
 	var searchTerm;
 
-	// 	get input from user
-	
-
 	function setEventListeners() {
-		//$.ajax({url: url, dataType: ‘json’})
 
 		$('.search__field--username').on('submit', function(e){
 			e.preventDefault();
 			searchTerm = $('.user-input--username').val();
+
 			// 	convert input to twitter-speak & GET
 			$.ajax({
 				url: 'twitter-proxy.php?op=user_timeline&screen_name=' + searchTerm,
@@ -23,6 +20,7 @@ var TwitterApi = (function(options) {
 		$('.search__field--keyword').on('submit', function(e){
 			e.preventDefault();
 			searchTerm = $('.user-input--quick-search').val();
+
 			// 	convert input to twitter-speak & GET
 			$.ajax({
 				url: 'twitter-proxy.php?op=search_tweets&q=' + searchTerm,
@@ -34,6 +32,7 @@ var TwitterApi = (function(options) {
 		$('.search__field--custom-search').on('submit', function(e){
 			e.preventDefault();
 			searchTerm = $('.user-input--custom-search').val();
+			
 			// 	convert input to twitter-speak & GET
 			$.ajax({
 				url: 'twitter-proxy.php?op=search_tweets&q=' + searchTerm + "&count=" + $('.user-input--custom-search__count').val() + "&result_type=" + $('.user-input--custom-search-type-select').val(),
@@ -49,18 +48,14 @@ var TwitterApi = (function(options) {
 	}
 
 	function populateResults(results) {
-		console.log(searchTerm);
 		if ( $('.search-results').has("div") ) {
 			$('.search-results').empty();
 		}
 		
 		// 	convert twitter-speak to object
 		if (results.length) {
-			
-			console.log(searchTerm);
 
 			for (i = 0; i < results.length; i++) {
-
 				username = results[i].user.screen_name;
 				tweetText = results[i].text;
 
@@ -71,17 +66,14 @@ var TwitterApi = (function(options) {
 				}
 
 				function linkToUser(e) {
-					console.log(tweetText);
 					var searchForThis = new RegExp('((http|https|www).+\\w+)', 'gi');
 					tweetText = e.replace(searchForThis, '<a href="$1">$1<a>');
 					
 					function searchForTags(e) {
-						console.log(tweetText);
 						var searchForThis = RegExp('@((\\w+))?', "ig");
-						tweetText = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>'); //'<a href="https://twitter.com/$1></a>'
+						tweetText = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>'); 
 						
 						function searchForHash(e) {
-							console.log(tweetText);
 							var searchForThis = RegExp('\\#((\\w+))?', "ig");
 							tweetText = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>');
 						}
