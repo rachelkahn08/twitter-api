@@ -3,19 +3,7 @@ var TwitterApi = (function(options) {
 	var options = options || {};
 	var searchTerm;
 
-	function setEventListeners() {
-
-		$('.search__field--username').on('submit', function(e){
-			e.preventDefault();
-			searchTerm = $('.user-input--username').val();
-
-			// 	convert input to twitter-speak & GET
-			$.ajax({
-				url: 'twitter-proxy.php?op=user_timeline&screen_name=' + searchTerm,
-				dataType: 'json'})
-			.done(populateResults);
-			return searchTerm;
-		});
+	var setEventListeners = function() {
 
 		$('.search__field--keyword').on('submit', function(e){
 			e.preventDefault();
@@ -28,23 +16,11 @@ var TwitterApi = (function(options) {
 			.done(ditchMetadata);
 			return searchTerm;
 		});
-
-		$('.search__field--custom-search').on('submit', function(e){
-			e.preventDefault();
-			searchTerm = $('.user-input--custom-search').val();
-			
-			// 	convert input to twitter-speak & GET
-			$.ajax({
-				url: 'twitter-proxy.php?op=search_tweets&q=' + searchTerm + "&count=" + $('.user-input--custom-search__count').val() + "&result_type=" + $('.user-input--custom-search-type-select').val(),
-				dataType: 'json'})
-			.done(ditchMetadata);
-			return searchTerm;
-		});	
 	}
 
 	function ditchMetadata(results) {
 		results = results.statuses;
-		populateResults(results);
+		GoogleApi.plotMarkers(results);
 	}
 
 	function populateResults(results) {
@@ -94,6 +70,8 @@ var TwitterApi = (function(options) {
 				tweetToPost.append(usernameToPost, tweetTextContainer);
 
 				$('.search-results').append(tweetToPost);
+
+				return tweetText;
 				
 			}
 		} else {
@@ -101,14 +79,85 @@ var TwitterApi = (function(options) {
 		}
 	}
 
-	var init = function() {
-		setEventListeners();	
-	};
-
-	shared.init = init;
+	shared.setEventListeners = setEventListeners;
 	return shared;
 
 }());
 
-TwitterApi.init();
+var GoogleApi = (function(options) {
+	var shared = {};
+	var options = options || {};
+	var map;
+	// var  coordinates = {};
+
+
+	var initMap = function() {
+		console.log("initmap");
+		map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 4,
+			center:{lat:0, lng:0}
+		});
+	}
+
+
+	var plotMarkers = function(data) {	
+
+		var newCenter = false; 
+
+		TwitterApi.populateResults(results);
+
+		for (i=0; i<data.length; i++) {
+			 if (data[i].coordinates != null) {
+			 	console.log(data[i]);
+
+				lng = data[i].coordinates.coordinates[0];
+				lat = data[i].coordinates.coordinates[1];
+				
+				markerLocation = {lat: lat, lng: lng};
+
+				if (newCenter == false) {
+					map.setCenter(markerLocation);
+					newCenter = true;
+				}
+
+
+
+				var marker = new google.maps.Marker({
+					position: markerLocation,
+					map: map
+					
+				});
+			}
+		}
+
+	}
+
+	shared.plotMarkers = plotMarkers;
+	shared.initMap = initMap;
+	return shared;
+
+}());
+
+var PageloadFunctions = (function(options) {
+	var shared = {};
+	var options = options || {};
+
+	var init = function() {
+		TwitterApi.setEventListeners();	
+	};
+
+	shared.init = init;
+
+	return shared;
+
+}());
+
+PageloadFunctions.init();
+
+
+
+
+
+
+
 
