@@ -20,7 +20,7 @@ var TwitterApi = (function(options) {
 
 	function ditchMetadata(results) {
 		results = results.statuses;
-		GoogleApi.plotMarkers(results);
+		populateResults(results);
 	}
 
 	function populateResults(results) {
@@ -32,47 +32,22 @@ var TwitterApi = (function(options) {
 		if (results.length) {
 
 			for (i = 0; i < results.length; i++) {
-				username = results[i].user.screen_name;
-				tweetText = results[i].text;
 
-				function highlightTerms(e) {
-					var searchForThis = new RegExp(searchTerm, 'gi');
-					var replaceWithThis = '<span class="highlight">' + searchTerm + '</span>';
-					return e.replace(searchForThis, replaceWithThis);
-				}
-
-				function linkToUser(e) {
-					var searchForThis = new RegExp('((http|https|www).+\\w+)', 'gi');
-					tweetText = e.replace(searchForThis, '<a href="$1">$1<a>');
-					
-					function searchForTags(e) {
-						var searchForThis = RegExp('@((\\w+))?', "ig");
-						tweetText = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>'); 
-						
-						function searchForHash(e) {
-							var searchForThis = RegExp('\\#((\\w+))?', "ig");
-							tweetText = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>');
-						}
-						return searchForHash(tweetText);
-					}
-
-					return searchForTags(tweetText);
-				}
-
-				linkToUser(tweetText);
+				var username = results[i].user.screen_name;
+					username = RegExProcesses.highlightTerms(searchTerm, username);
+				var tweetText = results[i].text;
+					tweetText = RegExProcesses.makeLinks(searchTerm, tweetText);
+				GoogleApi.createMarker(results[i], username, tweetText);
 
 				var usernameToPost = $("<h5>");
-					usernameToPost.html(highlightTerms(username));
+					usernameToPost.html(username);
 				var tweetTextContainer = $("<p>");
-					tweetTextContainer.append(highlightTerms(tweetText));
+					tweetTextContainer.append(tweetText);
 				var tweetToPost = $("<div>");
 
 				tweetToPost.append(usernameToPost, tweetTextContainer);
 
-				$('.search-results').append(tweetToPost);
-
-				return tweetText;
-				
+				$('.search-results').append(tweetToPost);				
 			}
 		} else {
 			window.alert("Sorry! We don't have any results for you.");
@@ -80,6 +55,53 @@ var TwitterApi = (function(options) {
 	}
 
 	shared.setEventListeners = setEventListeners;
+	return shared;
+
+}());
+
+var RegExProcesses = (function(options) {
+	var shared = {};
+	var options = options || {};
+
+	function highlightTerms(searchTerm, e) {
+		var searchForThis = new RegExp(searchTerm, 'gi');
+		var replaceWithThis = '<span class="highlight">' + searchTerm + '</span>';
+		return e.replace(searchForThis, replaceWithThis);
+	}
+
+	function httpLinks(e) {
+		var searchForThis = new RegExp('((http|https|www).+\\w+)', 'gi');
+		e = e.replace(searchForThis, '<a href="$1">$1<a>');
+		return e;
+	}
+		
+	function searchForTags(e) {
+		var searchForThis = RegExp('@((\\w+))?', "ig");
+		e = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>');
+		return e;
+	}
+			
+	function searchForHash(e) {
+		var searchForThis = RegExp('\\#((\\w+))?', "ig");
+		e = e.replace(searchForThis, '<a href="https://twitter.com/$1">$1</a>');
+		return e;
+	}
+
+	function makeLinks(searchTerm, e) {
+		console.log(e);
+		var stepOne = highlightTerms(searchTerm, e);
+		console.log(e);
+		var stepTwo = httpLinks(stepOne);
+		console.log(e);
+		var stepThree = searchForTags(stepTwo);
+		console.log(e);
+		var lastStep = searchForHash(stepThree);
+		console.log(e);
+		return lastStep;
+	}
+	
+	shared.highlightTerms = highlightTerms;
+	shared.makeLinks = makeLinks;
 	return shared;
 
 }());
@@ -94,45 +116,43 @@ var GoogleApi = (function(options) {
 	var initMap = function() {
 		console.log("initmap");
 		map = new google.maps.Map(document.getElementById('map'), {
-			zoom: 4,
+			zoom: 12,
 			center:{lat:0, lng:0}
 		});
 	}
 
 
-	var plotMarkers = function(data) {	
+	var createMarker = function(data, username, text) {
+		console.log(text);
 
-		var newCenter = false; 
+		if (data.coordinates != null) {
 
-		TwitterApi.populateResults(results);
+			lng = data.coordinates.coordinates[0];
+			lat = data.coordinates.coordinates[1];
 
-		for (i=0; i<data.length; i++) {
-			 if (data[i].coordinates != null) {
-			 	console.log(data[i]);
+			markerLocation = {lat: lat, lng: lng};
 
-				lng = data[i].coordinates.coordinates[0];
-				lat = data[i].coordinates.coordinates[1];
-				
-				markerLocation = {lat: lat, lng: lng};
-
-				if (newCenter == false) {
-					map.setCenter(markerLocation);
-					newCenter = true;
-				}
-
-
-
-				var marker = new google.maps.Marker({
-					position: markerLocation,
-					map: map
-					
-				});
+			if (!newCenter) {
+				map.setCenter(markerLocation);
+				var newCenter;
 			}
-		}
 
+			var infowindow = new google.maps.InfoWindow({
+			    content: '<h5>' + username + ':</h5>' + '<br>' + '<p>' + text + '</p>'
+			});
+
+			var marker = new google.maps.Marker({
+				position: markerLocation,
+				map: map
+			});
+
+			marker.addListener('click', function() {
+			    infowindow.open(map, marker);
+			});
+		}
 	}
 
-	shared.plotMarkers = plotMarkers;
+	shared.createMarker = createMarker;
 	shared.initMap = initMap;
 	return shared;
 
